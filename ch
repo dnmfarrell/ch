@@ -4,6 +4,7 @@ AUT="${CH_AUT:-}"                      # autogen title (default for tty)
 CON="${CH_CON:-5}"                     # connect timeout
 CUR="${CH_CUR:-.cur}"                  # symlink to current chat file
 DIR="${CH_DIR:-${TMPDIR:-/tmp}/chgpt}" # save chats here
+FRM="${CH_FRM:-text}"                  # Response format: (text,json_object)
 KEY="${CH_KEY:-$OPENAI_API_KEY}"
 LOG="${CH_LOG:-.err}"                  # error log name
 MOD="${CH_MOD:-gpt-3.5-turbo}"
@@ -67,6 +68,7 @@ chat_send() {
         -d '{"model": "'"$MOD"'",
              "messages":['"$1"'],
              "temperature":'"$TEM"',
+             "response_format": {"type":"'"$FRM"'"},
              "top_p":'"$TOP"'}')
   exi=$?
   if [ "$exi" -eq 28 ];then
