@@ -21,13 +21,13 @@ chat_list() {
 }
 
 chat_new() {
-  [ -z "$1" ] && err_exit "New requires an arg to send"
+  input_get "$1"
   [ -z "$TIT" ] && title_new
   if [ -n "$PRE" ];then
     cat "$PRE" > "$DIR/$TIT"
     [ "$?" -ne 0 ] && err_exit "Failed to read prelude: '$PRE'"
   fi
-  msg_new "$1"
+  msg_new "$INP"
   msg_save "$OUT"
   cur_set "$TIT"
   chat_retry
@@ -43,7 +43,8 @@ chat_puts() {
 
 chat_reply() {
   cur_get
-  msg_new "$1"
+  input_get "$1"
+  msg_new "$INP"
   msg_save "$OUT"
   chat_retry
 }
@@ -98,10 +99,10 @@ cur_get() {
 }
 
 cur_set() {
-  [ -z "$1" ] && err_exit "Set requires an arg"
+  input_get "$1"
   [ -z "$CUR" ] && return 0
   [ -e "$DIR/$1" ] || err_exit "Target current filename not found"
-  echo "$1" >> "$DIR/$CUR"
+  echo "$INP" >> "$DIR/$CUR"
 }
 
 dep_check() {
@@ -139,7 +140,21 @@ Options
   n|new <prompt>     start a new chat
   r|reply <reply>    reply to the current chat
   t|title            print the current chat title
+
+  Arguments in <angle brackets> are read from STDIN if not present.
 '
+}
+
+input_get() {
+  if [ -n "$1" ];then
+    INP="$1"
+  elif ! [ -t 0 ];then
+    while read -r line;do
+      INP="$INP$sep$line"
+      sep="\n"
+    done
+  fi
+  [ -z "$INP" ] && err_exit "didn't find any input"
 }
 
 msg_new() {

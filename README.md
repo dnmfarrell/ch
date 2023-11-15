@@ -24,6 +24,8 @@ Take your productivity to the next level with `ch`, the POSIX-compliant shell sc
       n|new <prompt>     start a new chat
       r|reply <reply>    reply to the current chat
       t|title            print the current chat title
+    
+      Arguments in <angle brackets> are read from STDIN if not present.
 
 ### Example
     $ ./ch n is it possible to '"delete"' lines of output in a terminal, or simulate it using ANSI escape sequences?
