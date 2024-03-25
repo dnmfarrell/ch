@@ -25,7 +25,9 @@ ch_new() {
 	ch_input_get "$1"
 	[ -z "$CH_TIT" ] && ch_title_new
 	if [ -r "$CH_PRE" ]; then
-		cat "$CH_PRE" >"$CH_DIR/$CH_TIT"
+		ch_pre=$(cat "$CH_PRE")
+		ch_msg_new "$ch_pre"
+		ch_msg_save "$CH_OUT"
 	fi
 	ch_msg_new "$CH_INP"
 	ch_msg_save "$CH_OUT"
