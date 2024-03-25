@@ -1,0 +1,34 @@
+HTTP/2 200
+date: Mon, 25 Mar 2024 14:19:14 GMT
+content-type: application/json
+content-length: 493
+access-control-allow-origin: *
+cache-control: no-cache, must-revalidate
+strict-transport-security: max-age=15724800; includeSubDomains
+server: cloudflare
+alt-svc: h3=":443"; ma=86400
+
+{
+  "id": "chatcmpl-qwertyuiopasdfghjklzxcvbnm12",
+  "object": "chat.completion",
+  "created": 1711376350,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "foo bar baz"
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 16,
+    "completion_tokens": 52,
+    "total_tokens": 68
+  },
+  "system_fingerprint": "qwertyuiop"
+}
+
