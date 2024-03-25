@@ -13,6 +13,7 @@ CH_RES="${CH_RES:-30}" # response timeout
 CH_TEM="${CH_TEM:-1}"  # chat temperature
 CH_TIT="${CH_TIT:-}"   # chat title
 CH_TOP="${CH_TOP:-1}"  # top_p nucleus sampling
+CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
 
 ch_list() {
 	for ch_f in "$CH_DIR"/*; do
@@ -30,7 +31,7 @@ ch_new() {
 	ch_msg_save "$CH_OUT"
 	ch_cur_set "$CH_TIT"
 	ch_retry
-	[ "$CH_AUT" = "1" ] && [ -n "$CH_CUR" ] && CH_CUR="$CH_CUR" "$0" 'g' &
+	[ "$CH_AUT" = "1" ] && [ -n "$CH_CUR" ] && CH_CUR="$CH_CUR" "$0" 'g'  > /dev/null &
 }
 
 ch_puts() {
@@ -60,7 +61,7 @@ ch_retry() {
 }
 
 ch_send() {
-	ch_res=$(curl -s 'https://api.openai.com/v1/chat/completions' \
+	ch_res=$(curl -s "$CH_URL" \
 		-m "$CH_RES" --connect-timeout "$CH_CON" \
 		-w '%{http_code}' \
 		-H "Content-Type: application/json" \
@@ -182,8 +183,9 @@ ch_title_gen() {
 	ch_msg_new "Create a title to be used as a linux filename for this text: $ch_msg"
 	ch_send "$CH_OUT" 2>/dev/null || exit 1
 	ch_title=$(printf "%s\n" "$CH_OUT" | jq -r .content)
-	mv "$CH_DIR/$CH_TIT" "$CH_DIR/$ch_title"
+	[ "$CH_TIT" != "$ch_title" ] && mv "$CH_DIR/$CH_TIT" "$CH_DIR/$ch_title"
 	ch_cur_set "$ch_title"
+	ch_title_puts
 }
 
 ch_title_new() {
