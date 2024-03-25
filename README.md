@@ -1,6 +1,6 @@
 ChatGPT Shell Script
 ---
-Take your productivity to the next level with `ch`, the POSIX-compliant shell script:
+Take your productivity to the next level with `ch`, the POSIX-compliant shell script/library:
 - Access ChatGPT from your terminal, no more context switching to browser tabs.
 - Save money: the typical monthly cost of ChatGPT API is much lower than the fixed fee for web access.¹
 - Program ChatGPT with standard shell tools like pipes, redirects and grep. No more copy and paste!
@@ -36,6 +36,9 @@ Take your productivity to the next level with `ch`, the POSIX-compliant shell sc
 
 I also recorded a [video](https://www.youtube.com/watch?v=9aYUvLeM0yo) with more background on the rationale for
 `ch` and example uses.
+
+### Library
+You can also "source" `ch` in your own shell scripts to use it as an API library. See `tests/run.sh` for an example.
 
 ### MIT License
 
