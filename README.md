@@ -1,15 +1,15 @@
 ChatGPT Shell Script
 ---
-Take your productivity to the next level with `ch`, the POSIX-compliant shell script/library:
+`ch` is a POSIX-compliant shell script/library:
 - Access ChatGPT from your terminal, no more context switching to browser tabs.
-- Save money: the typical monthly cost of ChatGPT API is much lower than the fixed fee for web access.¹
-- Program ChatGPT with standard shell tools like pipes, redirects and grep. No more copy and paste!
+- Integrate ChatGPT requests with standard shell tools like pipes, redirects and grep.
+- Source `ch` in your own shell scripts to use it as a library. See `tests/run.sh` for an example.
 
 ### System Requirements
-- An operating system with a POSIX-compatible shell. Tested on: Linux, MacOS, BSD, Android (via Termux).
-- A valid OpenAI ChatGPT API key. Create one at OpenAI.
-- The curl and jq utilities to be installed.
-- An Internet connection.
+1. An operating system with a POSIX-compatible shell. Tested on: Linux, MacOS, BSD, Android (via Termux).
+2. A valid OpenAI ChatGPT API key. Create one at OpenAI.
+3. The curl and jq utilities to be installed.
+4. An Internet connection.
 
 ### Usage
     ch [Option]
@@ -37,8 +37,24 @@ Take your productivity to the next level with `ch`, the POSIX-compliant shell sc
 I also recorded a [video](https://www.youtube.com/watch?v=9aYUvLeM0yo) with more background on the rationale for
 `ch` and example uses.
 
-### Library
-You can also "source" `ch` in your own shell scripts to use it as an API library. See `tests/run.sh` for an example.
+### Environment Variables
+Manipulate these to tune the behavior of `ch`. Default values are shown (in parens).
+
+    CH_ANS  # bold replies? (yes for tty)
+    CH_AUT  # autogen chat title (yes for tty)
+    CH_CON  # connect timeout (5 secs)
+    CH_CUR  # filepointer to the current conversation (CH_DIR/.cur)
+    CH_DIR  # save chats here ($TMPDIR/chgpt)
+    CH_FRM  # response format (text)
+    CH_KEY  # openai key (OPENAI_API_KEY)
+    CH_LOG  # error log name (CH_DIR/.err)
+    CH_MOD  # model name (gpt-3.5-turbo)
+    CH_PRE  # filename containing preamble to include in new chats
+    CH_RES  # response timeout (30 secs)
+    CH_TEM  # chat temperature (1)
+    CH_TIT  # chat title
+    CH_TOP  # top_p nucleus sampling (1)
+    CH_URL  # openai API URL (https://api.openai.com/v1/chat/completions)
 
 ### MIT License
 
