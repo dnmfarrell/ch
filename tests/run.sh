@@ -41,12 +41,14 @@ foo bar baz" "ch_puts"
 
 nc -l -p 8111 -q 1 >/dev/null <./tests/response.http &
 CH_PRE=./tests/preamble.txt
-res=$(ch_new "lorem ipsum" >/dev/null;ch_puts)
+res=$(
+	ch_new "lorem ipsum" >/dev/null
+	ch_puts
+)
 wait
 tap_cmp "$res" "this is the preamble text.
 lorem ipsum
 foo bar baz" "CH_PRE"
-
 
 rm -rf "$CH_DIR"
 tap_end
