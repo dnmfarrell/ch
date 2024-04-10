@@ -56,6 +56,19 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_TOP  # top_p nucleus sampling (1)
     CH_URL  # openai API URL (https://api.openai.com/v1/chat/completions)
 
+### Perplexity LLMs
+`ch` works with any compatible chat completion API that has the same interface as ChatGPT. All you have to do is
+override the appropriate environment variables. I created a shell script called `ppx` which wraps `ch` with
+the values to call a Perplexity online LLM instead of ChatGPT:
+
+    #!/bin/sh
+    export CH_AUT=0                                            # no autogen titles
+    export CH_DIR="/tmp/ppxty"                                 # save to alt dir
+    export CH_KEY="$PPLXTY_API_KEY"                            # ppx API key
+    export CH_MOD="sonar-small-online"                         # ppx model name
+    export CH_URL="https://api.perplexity.ai/chat/completions" # ppx API URL
+    ch "$@"
+
 ### MIT License
 
 Copyright (c) 2023 David Farrell
