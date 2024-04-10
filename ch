@@ -65,7 +65,7 @@ ch_retry() {
 ch_send() {
 	ch_res=$(curl -s "$CH_URL" \
 		-m "$CH_RES" --connect-timeout "$CH_CON" \
-		-w '%{http_code}' \
+		-w '\n%{http_code}' \
 		-H "Content-Type: application/json" \
 		-H "Authorization: Bearer $CH_KEY" \
 		-d '{"model": "'"$CH_MOD"'",
