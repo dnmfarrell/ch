@@ -103,8 +103,9 @@ ch_cur_get() {
 
 ch_cur_set() {
 	ch_input_get "$1"
+	CH_INP=$(basename "$CH_INP")
+	[ -e "$CH_DIR/$CH_INP" ] || ch_err_exit "Target current filename not found"
 	[ -z "$CH_CUR" ] && return 0
-	[ -e "$CH_DIR/$1" ] || ch_err_exit "Target current filename not found"
 	echo "$CH_INP" >>"$CH_DIR/$CH_CUR"
 }
 
