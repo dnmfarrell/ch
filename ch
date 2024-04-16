@@ -33,7 +33,7 @@ ch_new() {
 	ch_msg_save "$CH_OUT"
 	ch_cur_set "$CH_TIT"
 	ch_retry
-	[ "$CH_AUT" = "1" ] && [ -n "$CH_CUR" ] && CH_CUR="$CH_CUR" "$0" 'g'  > /dev/null &
+	[ "$CH_AUT" = "1" ] && [ -n "$CH_CUR" ] && CH_CUR="$CH_CUR" "$0" 'g' >/dev/null &
 }
 
 ch_puts() {
