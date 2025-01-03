@@ -23,6 +23,7 @@ ChatGPT Shell Script
       l|list             list all chat titles
       n|new <prompt>     start a new chat
       r|reply <reply>    reply to the current chat
+      s|source           print out the current chat raw json source
       t|title            print the current chat title
     
       Arguments in <angle brackets> are read from STDIN if not present.
