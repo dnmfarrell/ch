@@ -106,7 +106,7 @@ ch_cur_set() {
 	CH_INP=$(basename "$CH_INP")
 	[ -e "$CH_DIR/$CH_INP" ] || ch_err_exit "Target current filename not found"
 	[ -z "$CH_CUR" ] && return 0
-	echo "$CH_INP" >>"$CH_DIR/$CH_CUR"
+	printf "%s\n" "$CH_INP" >>"$CH_DIR/$CH_CUR"
 }
 
 ch_dep_check() {
@@ -172,7 +172,7 @@ ch_msg_puts() {
 	if [ "$ch_role" = "assistant" ]; then
 		ch_cont="$CH_BOL$ch_cont$CH_NOM"
 	fi
-	echo "$ch_cont"
+	printf "%s\n" "$ch_cont"
 }
 
 ch_msg_save() {
