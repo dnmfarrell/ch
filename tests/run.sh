@@ -21,34 +21,18 @@ tap_cmp "$res" "lorem ipsum
 foo bar baz" "ch_puts"
 
 nc -l -p 8111 -q 1 >/dev/null <./tests/response.http &
-res=$(ch_title_gen "lorem ipsum")
-wait
-tap_cmp "$res" "foo bar baz" "ch_title_gen"
-
-nc -l -p 8111 -q 1 >/dev/null <./tests/response.http &
 res=$(ch_reply "ipso facto")
 wait
 tap_cmp "$res" "foo bar baz" "ch_reply"
 
 res=$(ch_list)
-tap_cmp "$res" "$CH_DIR/foo bar baz" "ch_list"
+tap_cmp "$res" $(ls "$CH_DIR"/*) "ch_list"
 
 res=$(ch_puts)
 tap_cmp "$res" "lorem ipsum
 foo bar baz
 ipso facto
 foo bar baz" "ch_puts"
-
-nc -l -p 8111 -q 1 >/dev/null <./tests/response.http &
-CH_PRE=./tests/preamble.txt
-res=$(
-	ch_new "lorem ipsum" >/dev/null
-	ch_puts
-)
-wait
-tap_cmp "$res" "this is the preamble text.
-lorem ipsum
-foo bar baz" "CH_PRE"
 
 rm -rf "$CH_DIR"
 tap_end

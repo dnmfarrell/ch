@@ -1,6 +1,5 @@
 #!/bin/sh
 CH_ANS="${CH_ANS:-}"                      # bold replies? (default for tty)
-CH_AUT="${CH_AUT:-}"                      # autogen title (default for tty)
 CH_CON="${CH_CON:-5}"                     # connect timeout
 CH_CUR="${CH_CUR:-.cur}"                  # symlink to current chat file
 CH_DIR="${CH_DIR:-${TMPDIR:-/tmp}/chgpt}" # save chats here
@@ -8,11 +7,11 @@ CH_FRM="${CH_FRM:-text}"                  # Response format: (text,json_object)
 CH_KEY="${CH_KEY:-$OPENAI_API_KEY}"
 CH_LOG="${CH_LOG:-.err}" # error log name
 CH_MOD="${CH_MOD:-gpt-4o}"
-CH_PRE="${CH_PRE:-}"   # prelude to include in new chats
-CH_RES="${CH_RES:-30}" # response timeout
-CH_TEM="${CH_TEM:-1}"  # chat temperature
-CH_TIT="${CH_TIT:-}"   # chat title
-CH_TOP="${CH_TOP:-1}"  # top_p nucleus sampling
+CH_RES="${CH_RES:-30}"   # response timeout
+CH_ROL="${CH_ROL:-user}" # response timeout
+CH_TEM="${CH_TEM:-1}"    # chat temperature
+CH_TIT="${CH_TIT:-}"     # chat title
+CH_TOP="${CH_TOP:-1}"    # top_p nucleus sampling
 CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
 
 ch_list() {
@@ -24,16 +23,10 @@ ch_list() {
 ch_new() {
 	ch_input_get "$1"
 	[ -z "$CH_TIT" ] && ch_title_new
-	if [ -r "$CH_PRE" ]; then
-		ch_pre=$(cat "$CH_PRE")
-		ch_msg_new "$ch_pre"
-		ch_msg_save "$CH_OUT"
-	fi
 	ch_msg_new "$CH_INP"
 	ch_msg_save "$CH_OUT"
 	ch_cur_set "$CH_TIT"
 	ch_retry
-	[ "$CH_AUT" = "1" ] && [ -n "$CH_CUR" ] && CH_CUR="$CH_CUR" "$0" 'g' >/dev/null &
 }
 
 ch_puts() {
@@ -164,7 +157,7 @@ ch_input_get() {
 
 ch_msg_new() {
 	ch_con=$(printf "%s\n" "$1" | sed 's/"/\\\"/g')
-	CH_OUT='{"role":"user","content":"'"$ch_con"'"}'
+	CH_OUT='{"role":"'"$CH_ROL"'","content":"'"$ch_con"'"}'
 }
 
 ch_msg_puts() {
@@ -186,17 +179,6 @@ ch_source() {
 	cat "$CH_DIR/$CH_TIT"
 }
 
-ch_title_gen() {
-	ch_cur_get
-	ch_msg=$(head -n 1 "$CH_DIR/$CH_TIT" | jq -r .content)
-	ch_msg_new "Create a title to be used as a linux filename for this text: $ch_msg"
-	ch_send "$CH_OUT" 2>/dev/null || exit 1
-	ch_title=$(printf "%s\n" "$CH_OUT" | jq -r .content)
-	[ "$CH_TIT" != "$ch_title" ] && mv "$CH_DIR/$CH_TIT" "$CH_DIR/$ch_title"
-	ch_cur_set "$ch_title"
-	ch_title_puts
-}
-
 ch_title_new() {
 	CH_TIT="$(date '+%Y%m%d%H%M%S').$$"
 }
@@ -214,9 +196,6 @@ ch_bootstrap() {
 		if [ -z "$CH_ANS" ]; then
 			CH_ANS=1
 		fi
-		if [ -z "$CH_AUT" ]; then
-			CH_AUT=1
-		fi
 	fi
 	ch_escape_set
 	trap 'printf "$CH_NOM"' INT TERM EXIT
@@ -231,7 +210,6 @@ ch_main() {
 	case "$ch_a" in
 	"a" | "again") ch_retry ;;          # in case of error, send current chat again
 	"c" | "current") ch_cur_set "$1" ;; # set current chat to a file in $CH_DIR
-	"g" | "gen") ch_title_gen ;;        # generate title for current chat
 	"h" | "help") ch_help ;;            # print help
 	"p" | "print") ch_puts ;;           # print out the current chat
 	"l" | "list") ch_list ;;            # list all chats in $CH_DIR
