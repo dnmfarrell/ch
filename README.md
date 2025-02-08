@@ -1,30 +1,28 @@
 ChatGPT Shell Script
 ---
 `ch` is a POSIX-compliant shell script/library:
-- Access ChatGPT from your terminal, no more context switching to browser tabs.
+- Access LLMs like ChatGPT from your terminal, no more context switching to browser tabs.
 - Integrate ChatGPT requests with standard shell tools like pipes, redirects and grep.
 - Source `ch` in your own shell scripts to use it as a library. See `tests/run.sh` for an example.
 
 ### System Requirements
 1. An operating system with a POSIX-compatible shell. Tested on: Linux, MacOS, BSD, Android (via Termux).
-2. A valid OpenAI ChatGPT API key. Create one at OpenAI.
-3. The curl and jq utilities to be installed.
-4. An Internet connection.
+2. A valid LLM API key. Create one at OpenAI, Perplexity ...
+3. The utilities curl and jq to be installed.
 
 ### Usage
     ch [Option]
     
     Options
       a|again            in case of error, send current chat again
-      c|current <title>  switch the current chat to a differerent title
-      g|gen              generate title for current chat
+      c|current <ID>     switch the current chat to a differerent ID
       h|help             print this help
+      i|id               print the current chat ID
       p|print            print out the current chat
-      l|list             list all chat titles
+      l|list             list all chat IDs
       n|new <prompt>     start a new chat
       r|reply <reply>    reply to the current chat
       s|source           print out the current chat raw json source
-      t|title            print the current chat title
     
       Arguments in <angle brackets> are read from STDIN if not present.
 
@@ -34,15 +32,35 @@ ChatGPT Shell Script
     
     Here's an example of how you can simulate deleting lines in a terminal using ANSI escape sequences in Python:
     ...
+    $ ./ch r show me how to do it with bash shell code
+    ...
 
-I also recorded a [video](https://www.youtube.com/watch?v=9aYUvLeM0yo) with more background on the rationale for
-`ch` and example uses.
+All chats are stored in their own JSON line file under CH_TMP. The basename of each file is its unique chat ID. The `list` command lists all these files:
+
+    $ ./ch l
+    /tmp/chgpt/20250122204649.307857
+    /tmp/chgpt/20250205094326.769195
+    /tmp/chgpt/20250207145459.836016
+    /tmp/chgpt/20250208105540.843291
+
+Because chats are files, they can be read, grepped, piped and generally manipulated with standard shell tools. 
+
+The file `$CH_TMP/.cur` is a history of all chat IDs, one per line. When a chat is created, its ID is appended to .cur. The last ID in .cur is the current chat. It can be changed with the `current` command:
+
+    $ ./ch c 20250122204649.307857
+
+But chat IDs are kind of opaque, so I often grep chats to find the one I want to switch back to:
+
+    $ grep -li 'prolog variable' $(./ch l) | xargs basename | ./ch c
+    $ ch p
+    Is prolog variable unification scoped by disjunctive branches within the same goal?
+    In Prolog, variable unification is indeed scoped by disjunctive branches within the same goal.
+    ...
 
 ### Environment Variables
 Manipulate these to tune the behavior of `ch`. Default values are shown (in parens).
 
     CH_ANS  # bold replies? (yes for tty)
-    CH_AUT  # autogen chat title (yes for tty)
     CH_CON  # connect timeout (5 secs)
     CH_CUR  # filepointer to the current conversation (CH_DIR/.cur)
     CH_DIR  # save chats here ($TMPDIR/chgpt)
@@ -53,7 +71,7 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_PRE  # filename containing preamble to include in new chats
     CH_RES  # response timeout (30 secs)
     CH_TEM  # chat temperature (1)
-    CH_TIT  # chat title
+    CH_TIT  # chat ID
     CH_TOP  # top_p nucleus sampling (1)
     CH_URL  # openai API URL (https://api.openai.com/v1/chat/completions)
 
@@ -63,7 +81,6 @@ override the appropriate environment variables. I created a shell script called 
 the values to call a Perplexity online LLM instead of ChatGPT:
 
     #!/bin/sh
-    export CH_AUT=0                                            # no autogen titles
     export CH_DIR="/tmp/ppxty"                                 # save to alt dir
     export CH_KEY="$PPLXTY_API_KEY"                            # ppx API key
     export CH_MOD="sonar-small-online"                         # ppx model name
@@ -91,6 +108,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-¹ Depends on usage, in my case I went from spending $20 to less than $2 per month.

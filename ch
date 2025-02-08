@@ -10,7 +10,7 @@ CH_MOD="${CH_MOD:-gpt-4o}"
 CH_RES="${CH_RES:-30}"   # response timeout
 CH_ROL="${CH_ROL:-user}" # response timeout
 CH_TEM="${CH_TEM:-1}"    # chat temperature
-CH_TIT="${CH_TIT:-}"     # chat title
+CH_TIT="${CH_TIT:-}"     # chat ID
 CH_TOP="${CH_TOP:-1}"    # top_p nucleus sampling
 CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
 
@@ -22,7 +22,7 @@ ch_list() {
 
 ch_new() {
 	ch_input_get "$1"
-	[ -z "$CH_TIT" ] && ch_title_new
+	[ -z "$CH_TIT" ] && ch_id_new
 	ch_msg_new "$CH_INP"
 	ch_msg_save "$CH_OUT"
 	ch_cur_set "$CH_TIT"
@@ -129,15 +129,14 @@ ch_help() {
 
 Options
   a|again            in case of error, send current chat again
-  c|current <title>  switch the current chat to a differerent title
-  g|gen              generate title for current chat
+  c|current <ID>  	 switch the current chat to a differerent ID
   h|help             print this help
   p|print            print out the current chat
-  l|list             list all chat titles
+  i|id            	 print the current chat ID
+  l|list             list all chat IDs
   n|new <prompt>     start a new chat
   r|reply <reply>    reply to the current chat
 	s|source           print out the current chat raw json source
-  t|title            print the current chat title
 
   Arguments in <angle brackets> are read from STDIN if not present.
 '
@@ -170,7 +169,7 @@ ch_msg_puts() {
 }
 
 ch_msg_save() {
-	[ -z "$CH_TIT" ] && ch_err_exit "No title set"
+	[ -z "$CH_TIT" ] && ch_err_exit "No ID set"
 	printf "%s\n" "$1" >>"$CH_DIR/$CH_TIT"
 }
 
@@ -179,11 +178,11 @@ ch_source() {
 	cat "$CH_DIR/$CH_TIT"
 }
 
-ch_title_new() {
+ch_id_new() {
 	CH_TIT="$(date '+%Y%m%d%H%M%S').$$"
 }
 
-ch_title_puts() {
+ch_id_puts() {
 	ch_cur_get
 	printf "%s\n" "${CH_OUT##*/}"
 }
@@ -192,7 +191,7 @@ ch_bootstrap() {
 	ch_dep_check "jq"
 	ch_dep_check "curl"
 	[ -z "$CH_KEY" ] && ch_err_exit "No api key found (did you set OPENAI_API_KEY?)"
-	if [ -t 1 ]; then # if tty default to ANSI escape and autogen title
+	if [ -t 1 ]; then # if tty default to ANSI escape
 		if [ -z "$CH_ANS" ]; then
 			CH_ANS=1
 		fi
@@ -211,12 +210,12 @@ ch_main() {
 	"a" | "again") ch_retry ;;          # in case of error, send current chat again
 	"c" | "current") ch_cur_set "$1" ;; # set current chat to a file in $CH_DIR
 	"h" | "help") ch_help ;;            # print help
+	"i" | "id") ch_id_puts ;;           # print the current chat's ID
 	"p" | "print") ch_puts ;;           # print out the current chat
 	"l" | "list") ch_list ;;            # list all chats in $CH_DIR
 	"n" | "new") ch_new "$*" ;;         # start a new chat
 	"r" | "reply") ch_reply "$*" ;;     # add another message to the current chat
 	"s" | "source") ch_source ;;        # print out the source file
-	"t" | "title") ch_title_puts ;;     # print the current chat's title
 	*) ch_help ;;
 	esac
 }

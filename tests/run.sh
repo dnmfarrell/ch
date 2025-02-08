@@ -1,5 +1,4 @@
 #!/bin/sh
-CH_AUT=0
 CH_ANS=0
 CH_DIR="./tests/.run-$(date '+%Y%m%d%H%M%S').$$"
 CH_URL='0:8111'
