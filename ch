@@ -5,13 +5,15 @@ CH_CUR="${CH_CUR:-.cur}"                  # symlink to current chat file
 CH_DIR="${CH_DIR:-${TMPDIR:-/tmp}/chgpt}" # save chats here
 CH_FRM="${CH_FRM:-text}"                  # Response format: (text,json_object)
 CH_KEY="${CH_KEY:-$OPENAI_API_KEY}"
-CH_LOG="${CH_LOG:-.err}" # error log name
+CH_LOG="${CH_LOG:-.err}"       # error log name
+CH_MAX="${CH_MAX:-}"           # max tokens
+CH_MKY="${CH_MKY:-max_tokens}" # max tokens key name
 CH_MOD="${CH_MOD:-gpt-4o}"
 CH_RES="${CH_RES:-30}"   # response timeout
 CH_ROL="${CH_ROL:-user}" # response timeout
-CH_TEM="${CH_TEM:-1}"    # chat temperature
+CH_TEM="${CH_TEM:-}"     # chat temperature
 CH_TIT="${CH_TIT:-}"     # chat ID
-CH_TOP="${CH_TOP:-1}"    # top_p nucleus sampling
+CH_TOP="${CH_TOP:-}"     # top_p nucleus sampling
 CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
 
 ch_list() {
@@ -56,16 +58,16 @@ ch_retry() {
 }
 
 ch_send() {
+	ch_params='"model":"'"$CH_MOD"'","messages":['"$1"']'
+	[ -n "$CH_MAX" ] && ch_params="$ch_params",'"'$CH_MKY'":'"$CH_MAX"
+	[ -n "$CH_TEM" ] && ch_params="$ch_params",'"temperature":'"$CH_TEM"
+	[ -n "$CH_TOP" ] && ch_params="$ch_params",'"top_p":'"$CH_TOP"
 	ch_res=$(curl -s "$CH_URL" \
 		-m "$CH_RES" --connect-timeout "$CH_CON" \
 		-w '\n%{http_code}' \
 		-H "Content-Type: application/json" \
 		-H "Authorization: Bearer $CH_KEY" \
-		-d '{"model": "'"$CH_MOD"'",
-             "messages":['"$1"'],
-             "temperature":'"$CH_TEM"',
-             "response_format": {"type":"'"$CH_FRM"'"},
-             "top_p":'"$CH_TOP"'}')
+		-d "{$ch_params}")
 	ch_exi=$?
 	if [ "$ch_exi" -eq 28 ]; then
 		ch_err_log "request timeout, try again with 'ch a' or increase the timeout"

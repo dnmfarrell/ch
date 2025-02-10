@@ -1,8 +1,8 @@
-ChatGPT Shell Script
+Chat Shell Script
 ---
 `ch` is a POSIX-compliant shell script/library:
-- Access LLMs like ChatGPT from your terminal, no more context switching to browser tabs.
-- Integrate ChatGPT requests with standard shell tools like pipes, redirects and grep.
+- Access chat completion APIs from your terminal, no more context switching to browser tabs.
+- Integrate chat requests with standard shell tools like pipes, redirects and grep.
 - Source `ch` in your own shell scripts to use it as a library. See `tests/run.sh` for an example.
 
 ### System Requirements
@@ -43,7 +43,7 @@ All chats are stored in their own JSON line file under CH_TMP. The basename of e
     /tmp/chgpt/20250207145459.836016
     /tmp/chgpt/20250208105540.843291
 
-Because chats are files, they can be read, grepped, piped and generally manipulated with standard shell tools. 
+Because chats are files, they can be read, grepped, piped and generally manipulated with standard shell tools.
 
 The file `$CH_TMP/.cur` is a history of all chat IDs, one per line. When a chat is created, its ID is appended to .cur. The last ID in .cur is the current chat. It can be changed with the `current` command:
 
@@ -64,32 +64,52 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_CON  # connect timeout (5 secs)
     CH_CUR  # filepointer to the current conversation (CH_DIR/.cur)
     CH_DIR  # save chats here ($TMPDIR/chgpt)
-    CH_FRM  # response format (text)
+    CH_FRM  # response format
     CH_KEY  # openai key (OPENAI_API_KEY)
     CH_LOG  # error log name (CH_DIR/.err)
-    CH_MOD  # model name (gpt-3.5-turbo)
-    CH_PRE  # filename containing preamble to include in new chats
+    CH_MAX  # max tokens
+    CH_MKY  # max tokens key name (max_tokens)
+    CH_MOD  # model name (gpt-4o)
     CH_RES  # response timeout (30 secs)
-    CH_TEM  # chat temperature (1)
+    CH_TEM  # chat temperature
     CH_TIT  # chat ID
-    CH_TOP  # top_p nucleus sampling (1)
-    CH_URL  # openai API URL (https://api.openai.com/v1/chat/completions)
+    CH_TOP  # top_p nucleus sampling
+    CH_URL  # API URL (https://api.openai.com/v1/chat/completions)
 
-### Perplexity LLMs
-`ch` works with any compatible chat completion API that has the same interface as ChatGPT. All you have to do is
-override the appropriate environment variables. I created a shell script called `ppx` which wraps `ch` with
-the values to call a Perplexity online LLM instead of ChatGPT:
+### Other Models
+`ch` works with any compatible chat completion API that has the same interface as OpenAI.
+
+All you have to do is override the appropriate environment variables. These shell scripts do that:
+
+#### DeepSeek
 
     #!/bin/sh
+    # https://api-docs.deepseek.com/api/create-chat-completion
+    export CH_TEM                                              # pass this along
+    export CH_MAX                                              # pass this along
+    export CH_TOP                                              # pass this along
+    export CH_DIR="/tmp/dpseek"                                # save to alt dir
+    export CH_KEY="$DPSEEK_API_KEY"                            # use the deepseek API key
+    export CH_MOD="deepseek-chat"                              # deepseek model name
+    export CH_URL="https://api.deepseek.com/chat/completions"  # deepseek API URL
+    ch "$@"                                                    # ch must be in PATH
+
+#### Perplexity
+
+    #!/bin/sh
+    # https://docs.perplexity.ai/api-reference/chat-completions
+    export CH_TEM                                              # pass this along
+    export CH_MAX                                              # pass this along
+    export CH_TOP                                              # pass this along
     export CH_DIR="/tmp/ppxty"                                 # save to alt dir
-    export CH_KEY="$PPLXTY_API_KEY"                            # ppx API key
-    export CH_MOD="sonar-small-online"                         # ppx model name
+    export CH_KEY="$PPLXTY_API_KEY"                            # use the ppx API key
+    export CH_MOD="sonar"                                      # ppx model name
     export CH_URL="https://api.perplexity.ai/chat/completions" # ppx API URL
-    ch "$@"
+    ch "$@"                                                    # ch must be in PATH
 
 ### MIT License
 
-Copyright (c) 2023 David Farrell
+Copyright (c) 2025 David Farrell
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
