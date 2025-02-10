@@ -1,13 +1,14 @@
 Chat Shell Script
 ---
-`ch` is a POSIX-compliant shell script/library:
+`ch` is a POSIX-compliant shell script. It's a minimal framework around cURL to make it convenient to use chat completion models from the terminal:
 - Access chat completion APIs from your terminal, no more context switching to browser tabs.
+- Each conversation is stored in its own local file for easy replay, re-transmission etc.
 - Integrate chat requests with standard shell tools like pipes, redirects and grep.
 - Source `ch` in your own shell scripts to use it as a library. See `tests/run.sh` for an example.
 
 ### System Requirements
 1. An operating system with a POSIX-compatible shell. Tested on: Linux, MacOS, BSD, Android (via Termux).
-2. A valid LLM API key. Create one at OpenAI, Perplexity ...
+2. A valid API key. Create one at OpenAI, Perplexity, Deep Seek ...
 3. The utilities curl and jq to be installed.
 
 ### Usage
