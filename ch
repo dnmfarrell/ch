@@ -3,7 +3,6 @@ CH_ANS="${CH_ANS:-}"                      # bold replies? (default for tty)
 CH_CON="${CH_CON:-5}"                     # connect timeout
 CH_CUR="${CH_CUR:-.cur}"                  # symlink to current chat file
 CH_DIR="${CH_DIR:-${TMPDIR:-/tmp}/chgpt}" # save chats here
-CH_FRM="${CH_FRM:-text}"                  # Response format: (text,json_object)
 CH_KEY="${CH_KEY:-$OPENAI_API_KEY}"
 CH_LOG="${CH_LOG:-.err}"       # error log name
 CH_MAX="${CH_MAX:-}"           # max tokens

@@ -65,7 +65,6 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_CON  # connect timeout (5 secs)
     CH_CUR  # filepointer to the current conversation (CH_DIR/.cur)
     CH_DIR  # save chats here ($TMPDIR/chgpt)
-    CH_FRM  # response format
     CH_KEY  # openai key (OPENAI_API_KEY)
     CH_LOG  # error log name (CH_DIR/.err)
     CH_MAX  # max tokens
