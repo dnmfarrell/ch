@@ -4,17 +4,17 @@ TAP_FAIL_COUNT=0
 
 tap_pass() {
 	TAP_TEST_COUNT=$((TAP_TEST_COUNT + 1))
-	echo "ok $TAP_TEST_COUNT $1"
+	printf "ok %d %s\n" "$TAP_TEST_COUNT" "$1"
 }
 
 tap_fail() {
 	TAP_TEST_COUNT=$((TAP_TEST_COUNT + 1))
 	TAP_FAIL_COUNT=$((TAP_FAIL_COUNT + 1))
-	echo "not ok $TAP_TEST_COUNT $1"
+	printf "not ok %d %s\n" "$TAP_TEST_COUNT" "$1"
 }
 
 tap_end() {
-	echo "1..$TAP_TEST_COUNT"
+	printf "1..%d\n" "$TAP_TEST_COUNT"
 	exit $((TAP_FAIL_COUNT > 0)) # C semantics
 }
 
@@ -30,6 +30,7 @@ tap_cmp() {
 	if [ "$1" = "$2" ]; then
 		tap_pass "$3"
 	else
-		tap_fail "$3 - expected '$2' but got '$1'"
+		tap_str=$(printf "%s - expected '%s' but got '%s'" "$3" "$2" "$1")
+		tap_fail "$tap_str"
 	fi
 }

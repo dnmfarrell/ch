@@ -12,6 +12,10 @@ tap_ok "$?" "ch_bootstrap"
 ch_dep_check "nc" # for mock server response
 
 nc -l -p 8111 -q 1 >"$CH_REQ" <./tests/response.http &
+CH_HEA="x-api-key: deadbeef"
+CH_HE1="header: 1"
+CH_HE2="header: 2"
+CH_HE3="header: 3"
 CH_MAX=25
 CH_MKY=max_completion_tokens
 CH_MOD="foo-25"
@@ -19,15 +23,27 @@ CH_TEM=0.8
 CH_TOP=0.1
 res=$(ch_new "lorem ipsum")
 wait
+
+# request headers
+grep -q 'Content-Type: application/json' "$CH_REQ"
+tap_ok $? "Content-Type"
+grep -q "$CH_HEA" "$CH_REQ"
+tap_ok $? "Header Auth"
+grep -q "$CH_HE1" "$CH_REQ"
+tap_ok $? "Header 1"
+grep -q "$CH_HE2" "$CH_REQ"
+tap_ok $? "Header 2"
+grep -q "$CH_HE3" "$CH_REQ"
+tap_ok $? "Header 3"
+
+# request body
+tap_cmp $(tail -n 1 "$CH_REQ" | jq -r .max_completion_tokens) "$CH_MAX" "CH_MAX"
+tap_cmp $(tail -n 1 "$CH_REQ" | jq -r .model) "$CH_MOD" "CH_MOD"
+tap_cmp $(tail -n 1 "$CH_REQ" | jq -r .temperature) "$CH_TEM" "CH_TEM"
+tap_cmp $(tail -n 1 "$CH_REQ" | jq -r .top_p) "$CH_TOP" "CH_TOP"
+
+# response text
 tap_cmp "$res" "foo bar baz" "ch_new"
-max=$(tail -n 1 "$CH_REQ" | jq -r .max_completion_tokens)
-mod=$(tail -n 1 "$CH_REQ" | jq -r .model)
-tem=$(tail -n 1 "$CH_REQ" | jq -r .temperature)
-top=$(tail -n 1 "$CH_REQ" | jq -r .top_p)
-tap_cmp "$max" "$CH_MAX" "CH_MAX"
-tap_cmp "$mod" "$CH_MOD" "CH_MOD"
-tap_cmp "$tem" "$CH_TEM" "CH_TEM"
-tap_cmp "$top" "$CH_TOP" "CH_TOP"
 
 res=$(ch_puts)
 tap_cmp "$res" "lorem ipsum

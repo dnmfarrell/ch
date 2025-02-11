@@ -6,9 +6,11 @@ Chat Shell Script
 - Integrate chat requests with standard shell tools like pipes, redirects and grep.
 - Source `ch` in your own shell scripts to use it as a library. See `tests/run.sh` for an example.
 
+Works with OpenAI, Anthropic, DeepSeek and Perplexity APIs.
+
 ### System Requirements
 1. An operating system with a POSIX-compatible shell. Tested on: Linux, MacOS, BSD, Android (via Termux).
-2. A valid API key. Create one at OpenAI, Perplexity, Deep Seek ...
+2. A valid API key. Create one at OpenAI, Perplexity, DeepSeek ...
 3. The utilities curl and jq to be installed.
 
 ### Usage
@@ -77,17 +79,28 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_URL  # API URL (https://api.openai.com/v1/chat/completions)
 
 ### Other Models
-`ch` works with any compatible chat completion API that has the same interface as OpenAI.
+`ch` works with any compatible chat completion API that has a similar interface to OpenAI.
 
 All you have to do is override the appropriate environment variables. These shell scripts do that:
 
-#### DeepSeek
+#### Anthropic
+Anthropic [requires](https://docs.anthropic.com/en/api/messages) different HTTP headers and returns a different response object compared to the other APIs.
 
     #!/bin/sh
-    # https://api-docs.deepseek.com/api/create-chat-completion
-    export CH_TEM                                              # pass this along
-    export CH_MAX                                              # pass this along
-    export CH_TOP                                              # pass this along
+    export CH_MAX=1024                                         # max tokens, required
+    export CH_DIR="/tmp/anthropic"                             # save to alt dir
+    export CH_KEY="$ANTHPC_API_KEY"                            # use the anthropic API key
+    export CH_HEA="x-api-key: $CH_KEY"                         # override auth header
+    export CH_HE1="anthropic-version: 2023-06-01"              # include version header
+    export CH_MOD="claude-3-5-sonnet-20241022"                 # anthropic model name
+    export CH_URL="https://api.anthropic.com/v1/messages"      # anthropic API URL
+    export CH_RJQ='.content | .[] | {"role":"assistant","content":.text}' # parse the response
+    ch "$@"                                                    # ch must be in PATH
+
+#### DeepSeek
+DeepSeek [follows](https://api-docs.deepseek.com/api/create-chat-completion) the OpenAI API.
+
+    #!/bin/sh
     export CH_DIR="/tmp/dpseek"                                # save to alt dir
     export CH_KEY="$DPSEEK_API_KEY"                            # use the deepseek API key
     export CH_MOD="deepseek-chat"                              # deepseek model name
@@ -95,12 +108,9 @@ All you have to do is override the appropriate environment variables. These shel
     ch "$@"                                                    # ch must be in PATH
 
 #### Perplexity
+Perplexity [follows](https://docs.perplexity.ai/api-reference/chat-completions) the OpenAI API.
 
     #!/bin/sh
-    # https://docs.perplexity.ai/api-reference/chat-completions
-    export CH_TEM                                              # pass this along
-    export CH_MAX                                              # pass this along
-    export CH_TOP                                              # pass this along
     export CH_DIR="/tmp/ppxty"                                 # save to alt dir
     export CH_KEY="$PPLXTY_API_KEY"                            # use the ppx API key
     export CH_MOD="sonar"                                      # ppx model name

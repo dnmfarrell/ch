@@ -9,11 +9,16 @@ CH_MAX="${CH_MAX:-}"           # max tokens
 CH_MKY="${CH_MKY:-max_tokens}" # max tokens key name
 CH_MOD="${CH_MOD:-gpt-4o}"
 CH_RES="${CH_RES:-30}"   # response timeout
-CH_ROL="${CH_ROL:-user}" # response timeout
+CH_RJQ="${CH_RJQ:-.choices | .[] | .message}"
+CH_ROL="${CH_ROL:-user}" # role name to use
 CH_TEM="${CH_TEM:-}"     # chat temperature
 CH_TIT="${CH_TIT:-}"     # chat ID
 CH_TOP="${CH_TOP:-}"     # top_p nucleus sampling
 CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
+CH_HEA="${CH_HEA:-Authorization: Bearer $CH_KEY}" # http auth header
+CH_HE1="${CH_HE1:-}"                              # optional http header 1
+CH_HE2="${CH_HE2:-}"                              # optional http header 2
+CH_HE2="${CH_HE2:-}"                              # optional http header 3
 
 ch_list() {
 	for ch_f in "$CH_DIR"/*; do
@@ -61,11 +66,15 @@ ch_send() {
 	[ -n "$CH_MAX" ] && ch_params="$ch_params",'"'$CH_MKY'":'"$CH_MAX"
 	[ -n "$CH_TEM" ] && ch_params="$ch_params",'"temperature":'"$CH_TEM"
 	[ -n "$CH_TOP" ] && ch_params="$ch_params",'"top_p":'"$CH_TOP"
-	ch_res=$(curl -s "$CH_URL" \
+	ch_headers="Content-Type: application/json\n$CH_HEA\n"
+	[ -n "$CH_HE1" ] && ch_headers="$ch_headers$CH_HE1\n"
+	[ -n "$CH_HE2" ] && ch_headers="$ch_headers$CH_HE2\n"
+	[ -n "$CH_HE3" ] && ch_headers="$ch_headers$CH_HE3\n"
+
+	ch_res=$(printf "%b" "$ch_headers" | curl -s "$CH_URL" \
+		-H '@-' \
 		-m "$CH_RES" --connect-timeout "$CH_CON" \
 		-w '\n%{http_code}' \
-		-H "Content-Type: application/json" \
-		-H "Authorization: Bearer $CH_KEY" \
 		-d "{$ch_params}")
 	ch_exi=$?
 	if [ "$ch_exi" -eq 28 ]; then
@@ -76,7 +85,7 @@ ch_send() {
 		ch_code=$(printf "%s\n" "$ch_res" | tail -n 1)
 		ch_body=$(printf "%s\n" "$ch_res" | sed '$d')
 		if [ "$ch_code" -eq 200 ]; then
-			CH_OUT=$(printf "%s\n" "$ch_body" | jq -c '.choices | .[] | .message')
+			CH_OUT=$(printf "%s\n" "$ch_body" | jq -c "$CH_RJQ")
 			return 0
 		fi
 		ch_err=$(printf "%s\n" "$ch_body" | jq -r '.error | to_entries | map("\(.key):\(.value)") | join(", ")')
@@ -191,7 +200,7 @@ ch_id_puts() {
 ch_bootstrap() {
 	ch_dep_check "jq"
 	ch_dep_check "curl"
-	[ -z "$CH_KEY" ] && ch_err_exit "No api key found (did you set OPENAI_API_KEY?)"
+	[ -z "$CH_KEY" ] && ch_err_exit "No api key found (set CH_KEY or OPENAI_API_KEY)"
 	if [ -t 1 ]; then # if tty default to ANSI escape
 		if [ -z "$CH_ANS" ]; then
 			CH_ANS=1
