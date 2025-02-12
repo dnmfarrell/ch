@@ -4,21 +4,21 @@ CH_CON="${CH_CON:-5}"                     # connect timeout
 CH_CUR="${CH_CUR:-.cur}"                  # symlink to current chat file
 CH_DIR="${CH_DIR:-${TMPDIR:-/tmp}/chgpt}" # save chats here
 CH_KEY="${CH_KEY:-$OPENAI_API_KEY}"
-CH_LOG="${CH_LOG:-.err}"       # error log name
-CH_MAX="${CH_MAX:-}"           # max tokens
-CH_MKY="${CH_MKY:-max_tokens}" # max tokens key name
+CH_LOG="${CH_LOG:-.err}" # error log name
+CH_MAX="${CH_MAX:-}"     # max tokens
 CH_MOD="${CH_MOD:-gpt-4o}"
-CH_RES="${CH_RES:-30}"   # response timeout
+CH_RES="${CH_RES:-30}" # response timeout
 CH_RJQ="${CH_RJQ:-.choices | .[] | .message}"
+CH_ROB="${CH_ROB:-{\}}"  # optional json request obj
 CH_ROL="${CH_ROL:-user}" # role name to use
 CH_TEM="${CH_TEM:-}"     # chat temperature
 CH_TIT="${CH_TIT:-}"     # chat ID
 CH_TOP="${CH_TOP:-}"     # top_p nucleus sampling
 CH_URL="${CH_URL:-https://api.openai.com/v1/chat/completions}"
 CH_HEA="${CH_HEA:-Authorization: Bearer $CH_KEY}" # http auth header
-CH_HE1="${CH_HE1:-}"                              # optional http header 1
-CH_HE2="${CH_HE2:-}"                              # optional http header 2
-CH_HE2="${CH_HE2:-}"                              # optional http header 3
+CH_HES="${CH_HES:-}"                              # optional http headers
+
+[ -n "$CH_VER" ] && set -x
 
 ch_list() {
 	for ch_f in "$CH_DIR"/*; do
@@ -63,19 +63,19 @@ ch_retry() {
 
 ch_send() {
 	ch_params='"model":"'"$CH_MOD"'","messages":['"$1"']'
-	[ -n "$CH_MAX" ] && ch_params="$ch_params",'"'$CH_MKY'":'"$CH_MAX"
+	[ -n "$CH_MAX" ] && ch_params="$ch_params",'"max_tokens":'"$CH_MAX"
 	[ -n "$CH_TEM" ] && ch_params="$ch_params",'"temperature":'"$CH_TEM"
 	[ -n "$CH_TOP" ] && ch_params="$ch_params",'"top_p":'"$CH_TOP"
+	ch_req_json=$(printf "{%s} %s" "$ch_params" "$CH_ROB" | jq -cs '.[0]+.[1]')
+
 	ch_headers="Content-Type: application/json\n$CH_HEA\n"
-	[ -n "$CH_HE1" ] && ch_headers="$ch_headers$CH_HE1\n"
-	[ -n "$CH_HE2" ] && ch_headers="$ch_headers$CH_HE2\n"
-	[ -n "$CH_HE3" ] && ch_headers="$ch_headers$CH_HE3\n"
+	[ -n "$CH_HES" ] && ch_headers="$ch_headers$CH_HES\n"
 
 	ch_res=$(printf "%b" "$ch_headers" | curl -s "$CH_URL" \
 		-H '@-' \
 		-m "$CH_RES" --connect-timeout "$CH_CON" \
 		-w '\n%{http_code}' \
-		-d "{$ch_params}")
+		-d "$ch_req_json")
 	ch_exi=$?
 	if [ "$ch_exi" -eq 28 ]; then
 		ch_err_log "request timeout, try again with 'ch a' or increase the timeout"

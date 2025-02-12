@@ -67,18 +67,24 @@ Manipulate these to tune the behavior of `ch`. Default values are shown (in pare
     CH_CON  # connect timeout (5 secs)
     CH_CUR  # filepointer to the current conversation (CH_DIR/.cur)
     CH_DIR  # save chats here ($TMPDIR/chgpt)
+    CH_HES  # HTTP request headers to include in request (each must be newline terminated)
     CH_KEY  # openai key (OPENAI_API_KEY)
     CH_LOG  # error log name (CH_DIR/.err)
     CH_MAX  # max tokens
-    CH_MKY  # max tokens key name (max_tokens)
     CH_MOD  # model name (gpt-4o)
     CH_RES  # response timeout (30 secs)
-    CH_TEM  # chat temperature
+    CH_ROB  # json object to include in request
+    CH_TEM  # chat temperature https://platform.openai.com/docs/api-reference/chat/create#chat-create-temperature
     CH_TIT  # chat ID
-    CH_TOP  # top_p nucleus sampling
+    CH_TOP  # top_p nucleus sampling https://platform.openai.com/docs/api-reference/chat/create#chat-create-top_p
     CH_URL  # API URL (https://api.openai.com/v1/chat/completions)
 
-### Other Models
+Imagine, for example that we want to use a [stop](https://platform.openai.com/docs/api-reference/chat/create#chat-create-stop) sequence to terminate processing early. We can include that in the CH_ROB environment variable, which is a json object merged with the request object:
+
+    CH_ROB='{"stop":"sugar"}' ./ch n I am sweet and brown. Get me wet and I disappear. What am I?
+    The answer to this riddle is 
+
+### Other APIs
 `ch` works with any compatible chat completion API that has a similar interface to OpenAI.
 
 All you have to do is override the appropriate environment variables. These shell scripts do that:
@@ -91,12 +97,11 @@ Anthropic [requires](https://docs.anthropic.com/en/api/messages) different HTTP 
     export CH_DIR="/tmp/anthropic"                             # save to alt dir
     export CH_KEY="$ANTHPC_API_KEY"                            # use the anthropic API key
     export CH_HEA="x-api-key: $CH_KEY"                         # override auth header
-    export CH_HE1="anthropic-version: 2023-06-01"              # include version header
+    export CH_HES="anthropic-version: 2023-06-01\n"            # include version header
     export CH_MOD="claude-3-5-sonnet-20241022"                 # anthropic model name
     export CH_URL="https://api.anthropic.com/v1/messages"      # anthropic API URL
     export CH_RJQ='.content | .[] | {"role":"assistant","content":.text}' # parse the response
     ch "$@"                                                    # ch must be in PATH
-
 #### DeepSeek
 DeepSeek [follows](https://api-docs.deepseek.com/api/create-chat-completion) the OpenAI API.
 
